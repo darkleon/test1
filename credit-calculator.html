@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Кредитный калькулятор</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background-color: #fff;
+      border-radius: 15px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      padding: 30px;
+    }
+    
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+      font-size: 2em;
+    }
+    
+    .calculator-form {
+      display: grid;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .form-group label {
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 8px;
+      font-size: 0.95em;
+    }
+    
+    .form-group input,
+    .form-group select {
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1em;
+      transition: border-color 0.3s;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .radio-group {
+      display: flex;
+      gap: 20px;
+      margin-top: 8px;
+    }
+    
+    .radio-group label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      font-weight: normal;
+    }
+    
+    .radio-group input[type="radio"] {
+      margin-right: 8px;
+      cursor: pointer;
+    }
+    
+    .calculate-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 1.1em;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin-top: 10px;
+    }
+    
+    .calculate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .calculate-btn:active {
+      transform: translateY(0);
+    }
+    
+    .results {
+      display: none;
+      margin-top: 30px;
+    }
+    
+    .results.show {
+      display: block;
+    }
+    
+    .results-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .result-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .result-card h3 {
+      font-size: 0.9em;
+      font-weight: 500;
+      margin-bottom: 10px;
+      opacity: 0.9;
+    }
+    
+    .result-card .value {
+      font-size: 1.8em;
+      font-weight: 700;
+    }
+    
+    .schedule-section {
+      margin-top: 30px;
+    }
+    
+    .schedule-section h2 {
+      color: #333;
+      margin-bottom: 15px;
+      font-size: 1.5em;
+    }
+    
+    .schedule-table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .schedule-table thead {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .schedule-table th,
+    .schedule-table td {
+      padding: 12px;
+      text-align: left;
+    }
+    
+    .schedule-table th {
+      font-weight: 600;
+      font-size: 0.9em;
+    }
+    
+    .schedule-table tbody tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+    
+    .schedule-table tbody tr:hover {
+      background-color: #e9ecef;
+    }
+    
+    .schedule-table td {
+      color: #555;
+      font-size: 0.9em;
+    }
+    
+    .schedule-container {
+      max-height: 500px;
+      overflow-y: auto;
+      border-radius: 8px;
+    }
+    
+    .schedule-container::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .schedule-container::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    
+    .schedule-container::-webkit-scrollbar-thumb {
+      background: #667eea;
+      border-radius: 4px;
+    }
+    
+    .schedule-container::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px;
+      }
+      
+      h1 {
+        font-size: 1.5em;
+      }
+      
+      .results-summary {
+        grid-template-columns: 1fr;
+      }
+      
+      .schedule-table {
+        font-size: 0.85em;
+      }
+      
+      .schedule-table th,
+      .schedule-table td {
+        padding: 8px 6px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Кредитный калькулятор</h1>
+    
+    <form class="calculator-form" id="creditForm">
+      <div class="form-group">
+        <label for="loanAmount">Сумма кредита (₽)</label>
+        <input type="number" id="loanAmount" value="1000000" min="1" step="1" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="interestRate">Процентная ставка (% годовых)</label>
+        <input type="number" id="interestRate" value="12" min="0.01" step="0.01" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="loanTerm">Срок кредита</label>
+        <input type="number" id="loanTerm" value="12" min="1" step="1" required>
+      </div>
+      
+      <div class="form-group">
+        <label>Период</label>
+        <div class="radio-group">
+          <label>
+            <input type="radio" name="termType" value="months" checked>
+            Месяцев
+          </label>
+          <label>
+            <input type="radio" name="termType" value="years">
+            Лет
+          </label>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>Тип платежа</label>
+        <div class="radio-group">
+          <label>
+            <input type="radio" name="paymentType" value="annuity" checked>
+            Аннуитетный
+          </label>
+          <label>
+            <input type="radio" name="paymentType" value="differentiated">
+            Дифференцированный
+          </label>
+        </div>
+      </div>
+      
+      <button type="submit" class="calculate-btn">Рассчитать</button>
+    </form>
+    
+    <div class="results" id="results">
+      <div class="results-summary">
+        <div class="result-card">
+          <h3>Ежемесячный платеж</h3>
+          <div class="value" id="monthlyPayment">-</div>
+        </div>
+        <div class="result-card">
+          <h3>Сумма кредита</h3>
+          <div class="value" id="totalLoan">-</div>
+        </div>
+        <div class="result-card">
+          <h3>Переплата</h3>
+          <div class="value" id="overpayment">-</div>
+        </div>
+        <div class="result-card">
+          <h3>Общая сумма</h3>
+          <div class="value" id="totalPayment">-</div>
+        </div>
+      </div>
+      
+      <div class="schedule-section">
+        <h2>График платежей</h2>
+        <div class="schedule-container">
+          <table class="schedule-table">
+            <thead>
+              <tr>
+                <th>Месяц</th>
+                <th>Платеж</th>
+                <th>Основной долг</th>
+                <th>Проценты</th>
+                <th>Остаток</th>
+              </tr>
+            </thead>
+            <tbody id="scheduleBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    const form = document.getElementById('creditForm');
+    const resultsDiv = document.getElementById('results');
+    
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      calculateLoan();
+    });
+    
+    function formatNumber(number) {
+      return new Intl.NumberFormat('ru-RU', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(number);
+    }
+    
+    function calculateLoan() {
+      // Get input values
+      const loanAmount = parseFloat(document.getElementById('loanAmount').value);
+      const annualRate = parseFloat(document.getElementById('interestRate').value);
+      let loanTerm = parseInt(document.getElementById('loanTerm').value);
+      const termType = document.querySelector('input[name="termType"]:checked').value;
+      const paymentType = document.querySelector('input[name="paymentType"]:checked').value;
+      
+      // Convert years to months if needed
+      if (termType === 'years') {
+        loanTerm = loanTerm * 12;
+      }
+      
+      // Calculate monthly interest rate
+      const monthlyRate = annualRate / 100 / 12;
+      
+      let schedule = [];
+      let totalInterest = 0;
+      let monthlyPaymentDisplay = '';
+      
+      if (paymentType === 'annuity') {
+        // Annuity payment calculation
+        const monthlyPayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, loanTerm)) / 
+                               (Math.pow(1 + monthlyRate, loanTerm) - 1);
+        
+        monthlyPaymentDisplay = formatNumber(monthlyPayment) + ' ₽';
+        
+        let remainingBalance = loanAmount;
+        
+        for (let month = 1; month <= loanTerm; month++) {
+          const interestPayment = remainingBalance * monthlyRate;
+          const principalPayment = monthlyPayment - interestPayment;
+          remainingBalance -= principalPayment;
+          
+          // Handle rounding errors on last payment
+          if (month === loanTerm) {
+            remainingBalance = 0;
+          }
+          
+          totalInterest += interestPayment;
+          
+          schedule.push({
+            month: month,
+            payment: monthlyPayment,
+            principal: principalPayment,
+            interest: interestPayment,
+            balance: Math.max(0, remainingBalance)
+          });
+        }
+      } else {
+        // Differentiated payment calculation
+        const principalPayment = loanAmount / loanTerm;
+        let remainingBalance = loanAmount;
+        
+        let minPayment = Infinity;
+        let maxPayment = 0;
+        
+        for (let month = 1; month <= loanTerm; month++) {
+          const interestPayment = remainingBalance * monthlyRate;
+          const monthlyPayment = principalPayment + interestPayment;
+          remainingBalance -= principalPayment;
+          
+          // Handle rounding errors on last payment
+          if (month === loanTerm) {
+            remainingBalance = 0;
+          }
+          
+          totalInterest += interestPayment;
+          
+          minPayment = Math.min(minPayment, monthlyPayment);
+          maxPayment = Math.max(maxPayment, monthlyPayment);
+          
+          schedule.push({
+            month: month,
+            payment: monthlyPayment,
+            principal: principalPayment,
+            interest: interestPayment,
+            balance: Math.max(0, remainingBalance)
+          });
+        }
+        
+        monthlyPaymentDisplay = formatNumber(maxPayment) + ' ₽ ... ' + formatNumber(minPayment) + ' ₽';
+      }
+      
+      const totalPayment = loanAmount + totalInterest;
+      
+      // Display results
+      document.getElementById('monthlyPayment').textContent = monthlyPaymentDisplay;
+      document.getElementById('totalLoan').textContent = formatNumber(loanAmount) + ' ₽';
+      document.getElementById('overpayment').textContent = formatNumber(totalInterest) + ' ₽';
+      document.getElementById('totalPayment').textContent = formatNumber(totalPayment) + ' ₽';
+      
+      // Display schedule
+      const scheduleBody = document.getElementById('scheduleBody');
+      scheduleBody.innerHTML = '';
+      
+      schedule.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${row.month}</td>
+          <td>${formatNumber(row.payment)} ₽</td>
+          <td>${formatNumber(row.principal)} ₽</td>
+          <td>${formatNumber(row.interest)} ₽</td>
+          <td>${formatNumber(row.balance)} ₽</td>
+        `;
+        scheduleBody.appendChild(tr);
+      });
+      
+      // Show results
+      resultsDiv.classList.add('show');
+      
+      // Smooth scroll to results
+      resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  </script>
+</body>
+</html>
